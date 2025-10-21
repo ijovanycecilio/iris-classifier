@@ -1,6 +1,7 @@
 # src/train.py
+from pathlib import Path
+from joblib import dump
 import argparse
-import os
 
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
@@ -9,6 +10,11 @@ from sklearn.metrics import accuracy_score, confusion_matrix
 
 import matplotlib.pyplot as plt
 import seaborn as sns
+
+
+# ✅ Create outputs directory using pathlib
+output_dir = Path("outputs")
+output_dir.mkdir(exist_ok=True)
 
 
 def main(test_size: float = 0.2, random_state: int = 42) -> None:
@@ -25,6 +31,11 @@ def main(test_size: float = 0.2, random_state: int = 42) -> None:
     clf = DecisionTreeClassifier(random_state=random_state)
     clf.fit(X_train, y_train)
 
+    # ✅ Save the trained model using joblib inside outputs/
+    model_path = output_dir / "iris_model.joblib"
+    dump(clf, model_path)
+    print(f"Model saved to: {model_path}")
+
     # 4️⃣ Make predictions
     y_pred = clf.predict(X_test)
 
@@ -34,9 +45,8 @@ def main(test_size: float = 0.2, random_state: int = 42) -> None:
 
     cm = confusion_matrix(y_test, y_pred)
 
-    # 6️⃣ Save confusion-matrix figure
-    os.makedirs("outputs", exist_ok=True)  # create folder if missing
-    fig_path = os.path.join("outputs", "confusion_matrix.png")
+    # 6️⃣ Save confusion-matrix figure using pathlib
+    fig_path = output_dir / "confusion_matrix.png"
 
     plt.figure(figsize=(6, 4))
     sns.heatmap(
@@ -51,7 +61,7 @@ def main(test_size: float = 0.2, random_state: int = 42) -> None:
     plt.savefig(fig_path)
     plt.close()
 
-    print(f"Saved confusion-matrix figure to: {fig_path}")
+    print(f"Confusion matrix saved to: {fig_path}")
 
 
 if __name__ == "__main__":
